@@ -86,7 +86,9 @@ def ingest(input_file: Path, auto_classify: bool) -> None:
 
     # Print severity breakdown
     from collections import Counter
-    severity_counts: Counter[str] = Counter(i.severity.value for i in collector.all_incidents())
+    severity_counts: Counter[str] = Counter(
+        i.severity.value for i in collector.all_incidents()
+    )
     for severity, n in sorted(severity_counts.items()):
         click.echo(f"  {severity:15s}: {n}")
 

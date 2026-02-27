@@ -75,10 +75,10 @@ class ReportIncidentRequest(BaseModel):
 def list_incidents(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
-    severity: IncidentSeverity | None = Query(default=None),
-    category: IncidentCategory | None = Query(default=None),
-    verified: bool | None = Query(default=None),
-    store: IncidentStore = Depends(get_store),
+    severity: Annotated[IncidentSeverity | None, Query()] = None,
+    category: Annotated[IncidentCategory | None, Query()] = None,
+    verified: Annotated[bool | None, Query()] = None,
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> IncidentListResponse:
     """Return a paginated, optionally filtered list of safety incidents."""
     items, total = store.paginate(
@@ -100,12 +100,14 @@ def list_incidents(
 )
 def get_incident(
     incident_id: str,
-    store: IncidentStore = Depends(get_store),
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> SafetyIncident:
     """Retrieve a single incident by its ID."""
     incident = store.get(incident_id)
     if incident is None:
-        raise HTTPException(status_code=404, detail=f"Incident {incident_id!r} not found")
+        raise HTTPException(
+            status_code=404, detail=f"Incident {incident_id!r} not found"
+        )
     return incident
 
 
@@ -117,7 +119,7 @@ def get_incident(
 )
 def create_incident(
     request: ReportIncidentRequest,
-    store: IncidentStore = Depends(get_store),
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> SafetyIncident:
     """Submit a new safety incident. Optionally auto-classifies severity/category."""
     incident = request.incident
@@ -133,7 +135,7 @@ def create_incident(
     summary="Dashboard aggregate statistics",
 )
 def get_stats(
-    store: IncidentStore = Depends(get_store),
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> DashboardStats:
     """Return aggregate statistics for the dashboard."""
     return _analyzer.build_dashboard_stats(store.all())
@@ -145,7 +147,7 @@ def get_stats(
     summary="Incident timeline ordered by date",
 )
 def get_timeline(
-    store: IncidentStore = Depends(get_store),
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> IncidentTimeline:
     """Return incidents sorted chronologically with summary statistics."""
     return _analyzer.build_timeline(store.all())
@@ -158,7 +160,7 @@ def get_timeline(
 )
 def search_incidents(
     query: Annotated[str, Query(min_length=1)],
-    store: IncidentStore = Depends(get_store),
+    store: IncidentStore = Depends(get_store),  # noqa: B008
 ) -> list[SafetyIncident]:
     """Search incidents by keyword across title, description, and tags."""
     return store.search(query)

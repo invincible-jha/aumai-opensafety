@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from aumai_opensafety.models import (
@@ -252,8 +252,8 @@ class TimelineAnalyzer:
         incidents: list[SafetyIncident],
         days: int = 30,
     ) -> list[tuple[str, int]]:
-        """Return category counts for incidents in the last N days, sorted descending."""
-        cutoff = datetime.now(tz=timezone.utc) - timedelta(days=days)
+        """Return category counts for incidents in the last N days, sorted desc."""
+        cutoff = datetime.now(tz=UTC) - timedelta(days=days)
         recent = [i for i in incidents if i.reported_date >= cutoff]
         counts: Counter[str] = Counter(i.category.value for i in recent)
         return counts.most_common()
@@ -266,7 +266,7 @@ class TimelineAnalyzer:
         by_category: Counter[str] = Counter(i.category.value for i in incidents)
         verified_count = sum(1 for i in incidents if i.verified)
 
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         day_counts: dict[str, int] = defaultdict(int)
         for incident in incidents:
             if (now - incident.reported_date).days <= 30:
